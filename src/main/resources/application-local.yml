@@ -1,0 +1,10 @@
+spring:
+  data:
+    mongodb:
+      database: dopomoga
+      uri: mongodb://mongodb:mongodb@localhost:27017
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/aid-tools
+    username: postgres
+    password: postgres

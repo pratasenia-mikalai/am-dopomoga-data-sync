@@ -1,0 +1,3 @@
+airtable:
+  token:
+    read-only: "dummy"

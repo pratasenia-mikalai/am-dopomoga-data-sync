@@ -1,0 +1,33 @@
+spring:
+  main:
+    banner-mode: off
+  profiles:
+    active: local
+  data:
+    mongodb:
+      database: ${MONGO_DB_NAME}
+      uri: ${MONGO_DB_URI}
+      auto-index-creation: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${JPA_DB_NAME}
+    username: ${JPA_DB_USERNAME}
+    password: ${JPA_DB_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: never
+
+springdoc:
+  api-docs:
+    enabled: true
+  packages-to-scan: am.dopomoga.aidtools.controller
+
+airtable:
+  token:
+    read-only: ${AIRTABLE_TOKEN_READ_ONLY}
