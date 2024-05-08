@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.util.List;
 
-public record RefugeesDto(
+public record RefugeeDto(
         @JsonProperty("Name")
         String name,
         @JsonProperty("Пол")
@@ -19,5 +19,5 @@ public record RefugeesDto(
         Boolean refugeeStatus,
         @JsonProperty("Family")
         List<String> familyIds
-) implements FunctionalModel<RefugeesDto> {
+) implements FunctionalModel<RefugeeDto> {
 }

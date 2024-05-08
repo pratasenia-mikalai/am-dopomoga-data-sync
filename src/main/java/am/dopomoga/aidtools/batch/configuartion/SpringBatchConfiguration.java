@@ -1,11 +1,10 @@
 package am.dopomoga.aidtools.batch.configuartion;
 
 import am.dopomoga.aidtools.airtable.dto.TableDataDto;
-import am.dopomoga.aidtools.airtable.dto.response.AbstractAirtableTableResponse;
-import am.dopomoga.aidtools.airtable.restclient.AirtableTableListFunction;
+import am.dopomoga.aidtools.airtable.dto.response.AirtableTableListFunction;
 import am.dopomoga.aidtools.airtable.restclient.AirtableTablesClient;
-import am.dopomoga.aidtools.batch.*;
 import am.dopomoga.aidtools.batch.process.GoodImportItemProcessor;
+import am.dopomoga.aidtools.batch.process.RefugeeImportItemProcessor;
 import am.dopomoga.aidtools.batch.reader.AirtableRestItemReader;
 import am.dopomoga.aidtools.service.AirtableDatabaseService;
 import lombok.RequiredArgsConstructor;
@@ -20,22 +19,10 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.builder.MongoItemWriterBuilder;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.core.env.Environment;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.support.JdbcTransactionManager;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionManager;
-
-import javax.sql.DataSource;
 
 @Configuration
 @EnableBatchProcessing
@@ -48,12 +35,16 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
 
     @Bean
     public Job testJob(JobRepository jobRepository,
-                       GoodImportItemProcessor goodImportItemProcessor) {
+                       GoodImportItemProcessor goodImportItemProcessor,
+                       RefugeeImportItemProcessor refugeeImportItemProcessor) {
         Step goodsImport = airtableTableDataStep("GoodsImport", airtableTablesClient::getGoods,
                 goodImportItemProcessor, jobRepository);
+        Step refugeesImport = airtableTableDataStep("RefugeesImport", airtableTablesClient::getRefugees,
+                refugeeImportItemProcessor, jobRepository);
 
         return new JobBuilder("AirtableDataImportJob", jobRepository)
                 .start(goodsImport)
+                .next(refugeesImport)
 
                 .build();
     }

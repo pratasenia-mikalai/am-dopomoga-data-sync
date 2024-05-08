@@ -3,8 +3,10 @@ package am.dopomoga.aidtools.model.mapper;
 import am.dopomoga.aidtools.airtable.dto.AirtableDatabaseDto;
 import am.dopomoga.aidtools.airtable.dto.AirtablePermissionLevel;
 import am.dopomoga.aidtools.airtable.dto.GoodDto;
+import am.dopomoga.aidtools.airtable.dto.RefugeeDto;
 import am.dopomoga.aidtools.controller.dto.AirtableDatabaseApiModel;
 import am.dopomoga.aidtools.model.document.GoodDocument;
+import am.dopomoga.aidtools.model.document.RefugeeDocument;
 import am.dopomoga.aidtools.model.entity.AirtableDatabase;
 import am.dopomoga.aidtools.model.entity.PermissionLevel;
 import org.springframework.stereotype.Component;
@@ -69,6 +71,18 @@ public class ModelMapper {
             it.setUnitWeightKg(goodDto.unitWeightKg());
             it.addUnitEstimatedPrice(actualStartDate.toString(), goodDto.unitEstimatedPrice());
         });
+    }
+
+    public RefugeeDocument map(final RefugeeDto refugeeDto) {
+        return new RefugeeDocument().apply(it -> {
+                    it.setName(refugeeDto.name());
+                    it.setGender(refugeeDto.gender());
+                    it.setDateOfBirth(refugeeDto.dateOfBirth());
+                    it.setArrivalDate(refugeeDto.arrivalDate());
+                    it.setRefugeeStatus(refugeeDto.refugeeStatus());
+                    it.setAirtableOriginalFamilyIds(refugeeDto.familyIds());
+                }
+        );
     }
 
     private <E> E firstOrNull(List<E> list) {

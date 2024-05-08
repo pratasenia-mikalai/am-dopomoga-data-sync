@@ -1,6 +1,4 @@
-package am.dopomoga.aidtools.airtable.restclient;
-
-import am.dopomoga.aidtools.airtable.dto.response.AbstractAirtableTableResponse;
+package am.dopomoga.aidtools.airtable.dto.response;
 
 @FunctionalInterface
 public interface AirtableTableListFunction<T> {

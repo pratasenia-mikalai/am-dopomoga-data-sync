@@ -1,9 +1,9 @@
 package am.dopomoga.aidtools.batch.reader;
 
 import am.dopomoga.aidtools.airtable.AirtableRequestUtils;
-import am.dopomoga.aidtools.airtable.dto.response.AbstractAirtableTableResponse;
 import am.dopomoga.aidtools.airtable.dto.TableDataDto;
-import am.dopomoga.aidtools.airtable.restclient.AirtableTableListFunction;
+import am.dopomoga.aidtools.airtable.dto.response.AbstractAirtableTableResponse;
+import am.dopomoga.aidtools.airtable.dto.response.AirtableTableListFunction;
 import am.dopomoga.aidtools.batch.JobParameters;
 import am.dopomoga.aidtools.batch.StepExecutionContextAccess;
 import am.dopomoga.aidtools.controller.dto.AirtableDatabaseApiModel;
@@ -110,7 +110,7 @@ public class AirtableRestItemReader<T> extends StepExecutionContextAccess implem
     }
 
     private void logRecordsNumber() {
-        log.info( "{}. Read records: {}", this.stepName, this.databaseRecordCounter);
+        log.info("{}. Read records: {}", this.stepName, this.databaseRecordCounter);
         this.databaseRecordCounter = 0;
     }
 
