@@ -5,6 +5,8 @@ import am.dopomoga.aidtools.repository.mongo.RefugeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class RefugeeService {
@@ -20,6 +22,10 @@ public class RefugeeService {
             it.copyFieldsAndFillOnUpdate(existingRefugee);
             existingRefugee.getOriginAirtableIds().forEach(it::addOriginAirtableId);
         });
+    }
+
+    public List<RefugeeDocument> findFamilyByAirtableOriginalFamilyIds(List<String> airtableOriginalFamilyIds) {
+        return refugeeRepository.findByOriginAirtableIdsIn(airtableOriginalFamilyIds);
     }
 
 }

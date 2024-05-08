@@ -4,8 +4,10 @@ import am.dopomoga.aidtools.airtable.dto.TableDataDto;
 import am.dopomoga.aidtools.airtable.dto.response.AirtableTableListFunction;
 import am.dopomoga.aidtools.airtable.restclient.AirtableTablesClient;
 import am.dopomoga.aidtools.batch.process.GoodImportItemProcessor;
+import am.dopomoga.aidtools.batch.process.RefugeeFamilyIdsItemProcessor;
 import am.dopomoga.aidtools.batch.process.RefugeeImportItemProcessor;
 import am.dopomoga.aidtools.batch.reader.AirtableRestItemReader;
+import am.dopomoga.aidtools.model.document.RefugeeDocument;
 import am.dopomoga.aidtools.service.AirtableDatabaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -18,11 +20,17 @@ import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.data.builder.MongoItemReaderBuilder;
 import org.springframework.batch.item.data.builder.MongoItemWriterBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+
+import java.util.Map;
 
 @Configuration
 @EnableBatchProcessing
@@ -34,18 +42,45 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
     private final MongoTemplate mongoTemplate;
 
     @Bean
-    public Job testJob(JobRepository jobRepository,
-                       GoodImportItemProcessor goodImportItemProcessor,
-                       RefugeeImportItemProcessor refugeeImportItemProcessor) {
+    public Job importJob(JobRepository jobRepository,
+                         GoodImportItemProcessor goodImportItemProcessor,
+                         RefugeeImportItemProcessor refugeeImportItemProcessor,
+                         RefugeeFamilyIdsItemProcessor refugeeFamilyIdsItemProcessor) {
         Step goodsImport = airtableTableDataStep("GoodsImport", airtableTablesClient::getGoods,
                 goodImportItemProcessor, jobRepository);
         Step refugeesImport = airtableTableDataStep("RefugeesImport", airtableTablesClient::getRefugees,
                 refugeeImportItemProcessor, jobRepository);
+        Step refugeesFamilyIds = fillRefugeesFamilyIdsStep(refugeeFamilyIdsItemProcessor, jobRepository);
 
         return new JobBuilder("AirtableDataImportJob", jobRepository)
                 .start(goodsImport)
                 .next(refugeesImport)
+                .next(refugeesFamilyIds)
 
+                .build();
+    }
+
+    private Step fillRefugeesFamilyIdsStep(RefugeeFamilyIdsItemProcessor processor, JobRepository jobRepository) {
+        return new StepBuilder("RefugeesFamilyIds", jobRepository)
+                .<RefugeeDocument, RefugeeDocument>chunk(10, getTransactionManager())
+                .reader(
+                        new MongoItemReaderBuilder<RefugeeDocument>()
+                                .name("RefugeesFamilyIdsStepReader")
+                                .pageSize(10)
+                                .template(this.mongoTemplate)
+                                .targetType(RefugeeDocument.class)
+                                .query(Query.query(new Criteria()))
+                                .sorts(Map.of("id", Sort.Direction.ASC))
+                                .build()
+                )
+                .processor(processor)
+                .writer(
+                        new MongoItemWriterBuilder<RefugeeDocument>()
+                                .template(this.mongoTemplate)
+                                .build()
+                )
+                .readerIsTransactionalQueue()
+                .allowStartIfComplete(true)
                 .build();
     }
 
@@ -59,8 +94,8 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 .processor(processor)
                 .writer(
                         new MongoItemWriterBuilder<O>()
-                        .template(this.mongoTemplate)
-                       .build()
+                                .template(this.mongoTemplate)
+                                .build()
                 )
                 .readerIsTransactionalQueue()
                 .allowStartIfComplete(true)

@@ -32,4 +32,10 @@ public class TestController {
         return ResponseEntity.ok().build();
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/test")
+    public ResponseEntity<?> test() {
+
+        return ResponseEntity.ok().build();
+    }
+
 }

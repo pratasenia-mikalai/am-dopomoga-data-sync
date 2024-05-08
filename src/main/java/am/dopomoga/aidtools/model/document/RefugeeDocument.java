@@ -5,6 +5,7 @@ import am.dopomoga.aidtools.model.MongoCollectionsConst;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -28,6 +29,7 @@ public class RefugeeDocument extends AbstractDocument implements FunctionalModel
     @Field(targetType = FieldType.STRING)
     private LocalDate arrivalDate;
     private Boolean refugeeStatus;
+    @Indexed
     private Set<String> originAirtableIds;
     private List<UUID> familyIds;
     private List<String> airtableOriginalFamilyIds;
