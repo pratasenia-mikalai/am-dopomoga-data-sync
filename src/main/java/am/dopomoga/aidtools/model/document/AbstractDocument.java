@@ -1,5 +1,6 @@
 package am.dopomoga.aidtools.model.document;
 
+import am.dopomoga.aidtools.model.FunctionalModel;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
@@ -7,7 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
-public abstract class AbstractDocument {
+public abstract class AbstractDocument<T> implements FunctionalModel<T> {
 
     @Id
     private UUID id;
@@ -20,7 +21,7 @@ public abstract class AbstractDocument {
         this.lastUpdatedDate = OffsetDateTime.now();
     }
 
-    public void copyFieldsAndFillOnUpdate(AbstractDocument abstractDocument) {
+    public void copyFieldsAndFillOnUpdate(AbstractDocument<T> abstractDocument) {
         this.id = abstractDocument.getId();
         this.createdDate = abstractDocument.getCreatedDate();
         this.lastUpdatedDate = OffsetDateTime.now();

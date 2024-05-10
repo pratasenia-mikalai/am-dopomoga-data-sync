@@ -28,4 +28,8 @@ public class RefugeeService {
         return refugeeRepository.findByOriginAirtableIdsIn(airtableOriginalFamilyIds);
     }
 
+    public RefugeeDocument findByOriginAirtableId(String originAirtableId) {
+        return refugeeRepository.findByOriginAirtableIds(originAirtableId);
+    }
+
 }

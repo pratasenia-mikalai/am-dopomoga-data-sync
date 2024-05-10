@@ -3,9 +3,7 @@ package am.dopomoga.aidtools.batch.configuartion;
 import am.dopomoga.aidtools.airtable.dto.TableDataDto;
 import am.dopomoga.aidtools.airtable.dto.response.AirtableTableListFunction;
 import am.dopomoga.aidtools.airtable.restclient.AirtableTablesClient;
-import am.dopomoga.aidtools.batch.process.GoodImportItemProcessor;
-import am.dopomoga.aidtools.batch.process.RefugeeFamilyIdsItemProcessor;
-import am.dopomoga.aidtools.batch.process.RefugeeImportItemProcessor;
+import am.dopomoga.aidtools.batch.process.*;
 import am.dopomoga.aidtools.batch.reader.AirtableRestItemReader;
 import am.dopomoga.aidtools.model.document.RefugeeDocument;
 import am.dopomoga.aidtools.service.AirtableDatabaseService;
@@ -45,17 +43,26 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
     public Job importJob(JobRepository jobRepository,
                          GoodImportItemProcessor goodImportItemProcessor,
                          RefugeeImportItemProcessor refugeeImportItemProcessor,
-                         RefugeeFamilyIdsItemProcessor refugeeFamilyIdsItemProcessor) {
+                         RefugeeFamilyIdsItemProcessor refugeeFamilyIdsItemProcessor,
+                         SupportImportItemProcessor supportImportItemProcessor,
+                         MinusImportItemProcessor minusImportItemProcessor) {
         Step goodsImport = airtableTableDataStep("GoodsImport", airtableTablesClient::getGoods,
                 goodImportItemProcessor, jobRepository);
         Step refugeesImport = airtableTableDataStep("RefugeesImport", airtableTablesClient::getRefugees,
                 refugeeImportItemProcessor, jobRepository);
         Step refugeesFamilyIds = fillRefugeesFamilyIdsStep(refugeeFamilyIdsItemProcessor, jobRepository);
+        Step supportImport = airtableTableDataStep("SupportImport", airtableTablesClient::getSupport,
+                supportImportItemProcessor, jobRepository);
+        Step minusImport = airtableTableDataStep("MinusImport", airtableTablesClient::getMinus,
+                minusImportItemProcessor, jobRepository);
+
 
         return new JobBuilder("AirtableDataImportJob", jobRepository)
                 .start(goodsImport)
                 .next(refugeesImport)
                 .next(refugeesFamilyIds)
+                .next(supportImport)
+                .next(minusImport)
 
                 .build();
     }

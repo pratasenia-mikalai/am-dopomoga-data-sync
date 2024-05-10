@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record MinusDto(
+        @JsonProperty("ID")
+        Integer idNumber,
         @JsonProperty("Goods")
         List<String> goodsId,
         @JsonProperty("_minus")

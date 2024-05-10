@@ -13,6 +13,8 @@ public interface RefugeeRepository extends MongoRepository<RefugeeDocument, UUID
 
     RefugeeDocument findByNameAndDateOfBirth(String name, LocalDate dateOfBirth);
 
-    List<RefugeeDocument> findByOriginAirtableIdsIn(List<String> ids);
+    List<RefugeeDocument> findByOriginAirtableIdsIn(List<String> originAirtableIds);
+
+    RefugeeDocument findByOriginAirtableIds(String originAirtableId);
 
 }

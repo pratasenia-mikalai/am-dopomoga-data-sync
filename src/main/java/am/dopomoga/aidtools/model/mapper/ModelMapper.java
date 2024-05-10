@@ -1,12 +1,11 @@
 package am.dopomoga.aidtools.model.mapper;
 
-import am.dopomoga.aidtools.airtable.dto.AirtableDatabaseDto;
-import am.dopomoga.aidtools.airtable.dto.AirtablePermissionLevel;
-import am.dopomoga.aidtools.airtable.dto.GoodDto;
-import am.dopomoga.aidtools.airtable.dto.RefugeeDto;
+import am.dopomoga.aidtools.airtable.dto.*;
 import am.dopomoga.aidtools.controller.dto.AirtableDatabaseApiModel;
 import am.dopomoga.aidtools.model.document.GoodDocument;
+import am.dopomoga.aidtools.model.document.MinusDocument;
 import am.dopomoga.aidtools.model.document.RefugeeDocument;
+import am.dopomoga.aidtools.model.document.SupportDocument;
 import am.dopomoga.aidtools.model.entity.AirtableDatabase;
 import am.dopomoga.aidtools.model.entity.PermissionLevel;
 import org.springframework.stereotype.Component;
@@ -81,6 +80,25 @@ public class ModelMapper {
                     it.setArrivalDate(refugeeDto.arrivalDate());
                     it.setRefugeeStatus(refugeeDto.refugeeStatus());
                     it.setAirtableOriginalFamilyIds(refugeeDto.familyIds());
+                }
+        );
+    }
+
+    public SupportDocument map(final SupportDto supportDto) {
+        return new SupportDocument().apply(it -> {
+            it.setDate(supportDto.date());
+            it.setOriginAirtableRefugeeId(firstOrNull(supportDto.refugeeIds()));
+            it.setStatus(supportDto.status());
+            it.setOriginAirtableIdNumber(supportDto.idNumber());
+        });
+    }
+
+    public MinusDocument map(final MinusDto minusDto) {
+        return new MinusDocument().apply(it -> {
+                    it.setOriginAirtableGoodId(firstOrNull(minusDto.goodsId()));
+                    it.setOriginAirtableSupportId(firstOrNull(minusDto.supportId()));
+                    it.setMinus(minusDto.minus());
+                    it.setOriginAirtableIdNumber(minusDto.idNumber());
                 }
         );
     }

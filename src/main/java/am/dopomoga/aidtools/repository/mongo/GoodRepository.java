@@ -15,4 +15,6 @@ public interface GoodRepository extends MongoRepository<GoodDocument, UUID> {
 
     GoodDocument findByNameIdAndType(String nameId, String type);
 
+    GoodDocument findByOriginAirtableIds(String id);
+
 }

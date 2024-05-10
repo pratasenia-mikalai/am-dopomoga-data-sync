@@ -8,7 +8,7 @@ import java.util.List;
 
 public record SupportDto(
         @JsonProperty("ID")
-        String idNumber,
+        Integer idNumber,
         @JsonProperty("Status")
         String status,
         @JsonProperty("Date")

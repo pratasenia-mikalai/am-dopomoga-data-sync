@@ -1,6 +1,5 @@
 package am.dopomoga.aidtools.model.document;
 
-import am.dopomoga.aidtools.model.FunctionalModel;
 import am.dopomoga.aidtools.model.MongoCollectionsConst;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,7 +19,7 @@ import java.util.UUID;
 @Data
 @Document(MongoCollectionsConst.REFUGEE)
 @CompoundIndex(def ="{'name': 1, 'dateOfBirth': 1}", unique = true)
-public class RefugeeDocument extends AbstractDocument implements FunctionalModel<RefugeeDocument> {
+public class RefugeeDocument extends AbstractDocument<RefugeeDocument> {
 
     private String name;
     private String gender;

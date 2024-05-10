@@ -1,6 +1,5 @@
 package am.dopomoga.aidtools.model.document;
 
-import am.dopomoga.aidtools.model.FunctionalModel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ import static am.dopomoga.aidtools.model.MongoCollectionsConst.GOOD;
 @Document(GOOD)
 @Data
 @CompoundIndex(def ="{'nameId': 1, 'type': 1}", unique = true)
-public class GoodDocument extends AbstractDocument implements FunctionalModel<GoodDocument> {
+public class GoodDocument extends AbstractDocument<GoodDocument> {
 
     private String name;
     private String type;

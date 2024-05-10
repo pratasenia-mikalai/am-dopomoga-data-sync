@@ -17,6 +17,10 @@ public class GoodService {
         return goodRepository.findByNameId(nameId);
     }
 
+    public GoodDocument findByOriginAirtableId(String originAirtableId) {
+        return goodRepository.findByOriginAirtableIds(originAirtableId);
+    }
+
     public GoodDocument prepareFromRawAirtableModel(GoodDocument raw) {
         GoodDocument existingGood = goodRepository.findByNameIdAndType(raw.getNameId(), raw.getType());
         if (existingGood == null) {
