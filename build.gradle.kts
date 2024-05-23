@@ -67,22 +67,8 @@ dependencyManagement {
     }
 }
 
-tasks.register<Copy>("getUIArtifactsFromSubproject") {
-    from("${rootProject.projectDir}/aid-tools-ui/dist/aid-tools-ui")
-    into("${rootProject.projectDir}/src/main/resources/static")
-}
-
-tasks.named("getUIArtifactsFromSubproject") {
-    dependsOn(":aid-tools-ui:assembleFrontend")
-}
-
 tasks.named("build") {
     dependsOn("liquibaseUpdate")
-}
-
-
-tasks.processResources {
-    dependsOn("getUIArtifactsFromSubproject")
 }
 
 tasks.withType<Test> {
