@@ -14,5 +14,10 @@ public record MinusDto(
         Integer minus,
         @JsonProperty("Support")
         List<String> supportId
-) implements FunctionalModel<MinusDto> {
+) implements FunctionalModel<MinusDto>, AirtableBlankableItem {
+        @Override
+        public boolean isBlank() {
+                return this.goodsId == null || this.goodsId.isEmpty() ||
+                        this.supportId == null || this.supportId.isEmpty();
+        }
 }

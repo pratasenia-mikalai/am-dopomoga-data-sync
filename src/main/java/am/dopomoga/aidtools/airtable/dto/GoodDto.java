@@ -16,5 +16,10 @@ public record GoodDto(
         BigDecimal unitEstimatedPrice,
         @JsonProperty("ID_name")
         String nameId
-) implements FunctionalModel<GoodDto> {
+) implements FunctionalModel<GoodDto>, AirtableBlankableItem {
+
+    @Override
+    public boolean isBlank() {
+        return this.name == null || this.name.isBlank();
+    }
 }

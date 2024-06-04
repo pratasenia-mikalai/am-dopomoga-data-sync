@@ -27,4 +27,6 @@ public abstract class AbstractDocument<T> implements FunctionalModel<T> {
         this.lastUpdatedDate = OffsetDateTime.now();
     }
 
+    public abstract void setOriginAirtableId(String originAirtableId);
+
 }

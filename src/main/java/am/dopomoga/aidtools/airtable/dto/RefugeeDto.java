@@ -19,5 +19,9 @@ public record RefugeeDto(
         Boolean refugeeStatus,
         @JsonProperty("Family")
         List<String> familyIds
-) implements FunctionalModel<RefugeeDto> {
+) implements FunctionalModel<RefugeeDto>, AirtableBlankableItem {
+    @Override
+    public boolean isBlank() {
+        return this.name == null || this.name.isBlank();
+    }
 }

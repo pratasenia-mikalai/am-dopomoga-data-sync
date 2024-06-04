@@ -15,5 +15,9 @@ public record SupportDto(
         LocalDate date,
         @JsonProperty("Who")
         List<String> refugeeIds
-) implements FunctionalModel<SupportDto> {
+) implements FunctionalModel<SupportDto>, AirtableBlankableItem {
+    @Override
+    public boolean isBlank() {
+        return this.date == null || this.refugeeIds == null || this.refugeeIds.isEmpty();
+    }
 }

@@ -1,11 +1,9 @@
 package am.dopomoga.aidtools.model.mapper;
 
 import am.dopomoga.aidtools.airtable.dto.*;
+import am.dopomoga.aidtools.airtable.dto.PlusDto;
 import am.dopomoga.aidtools.controller.dto.AirtableDatabaseApiModel;
-import am.dopomoga.aidtools.model.document.GoodDocument;
-import am.dopomoga.aidtools.model.document.MinusDocument;
-import am.dopomoga.aidtools.model.document.RefugeeDocument;
-import am.dopomoga.aidtools.model.document.SupportDocument;
+import am.dopomoga.aidtools.model.document.*;
 import am.dopomoga.aidtools.model.entity.AirtableDatabase;
 import am.dopomoga.aidtools.model.entity.PermissionLevel;
 import org.springframework.stereotype.Component;
@@ -99,6 +97,16 @@ public class ModelMapper {
                     it.setOriginAirtableSupportId(firstOrNull(minusDto.supportId()));
                     it.setMinus(minusDto.minus());
                     it.setOriginAirtableIdNumber(minusDto.idNumber());
+                }
+        );
+    }
+
+    public PlusDocument map(final PlusDto plusDto) {
+        return new PlusDocument().apply(it -> {
+                    it.setOriginAirtableGoodId(firstOrNull(plusDto.goodsId()));
+                    it.setPlus(plusDto.plus());
+                    it.setCreatedInAirtable(plusDto.created());
+                    it.setUpdatedInAirtable(plusDto.lastModified());
                 }
         );
     }

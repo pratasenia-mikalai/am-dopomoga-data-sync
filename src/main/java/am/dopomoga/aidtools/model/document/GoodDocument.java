@@ -3,7 +3,6 @@ package am.dopomoga.aidtools.model.document;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -20,11 +19,11 @@ import static am.dopomoga.aidtools.model.MongoCollectionsConst.GOOD;
 @Slf4j
 @Document(GOOD)
 @Data
-@CompoundIndex(def ="{'nameId': 1, 'type': 1}", unique = true)
 public class GoodDocument extends AbstractDocument<GoodDocument> {
 
     private String name;
     private String type;
+    @Indexed
     private String nameId;
     @Indexed
     private Set<String> originAirtableIds;
@@ -47,4 +46,8 @@ public class GoodDocument extends AbstractDocument<GoodDocument> {
 
     }
 
+    @Override
+    public void setOriginAirtableId(String originAirtableId) {
+        addOriginAirtableId(originAirtableId);
+    }
 }

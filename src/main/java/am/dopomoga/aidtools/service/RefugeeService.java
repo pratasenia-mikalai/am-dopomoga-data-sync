@@ -15,6 +15,7 @@ public class RefugeeService {
 
     public RefugeeDocument prepareFromRawAirtableModel(RefugeeDocument raw) {
         RefugeeDocument existingRefugee = refugeeRepository.findByNameAndDateOfBirth(raw.getName(), raw.getDateOfBirth());
+
         if (existingRefugee == null) {
             return raw.apply(RefugeeDocument::fillFieldsOnCreate);
         }

@@ -1,10 +1,7 @@
 package am.dopomoga.aidtools.airtable.restclient;
 
 import am.dopomoga.aidtools.airtable.AirtableReadOnlyConfiguration;
-import am.dopomoga.aidtools.airtable.dto.response.AirtableGoodsTableResponse;
-import am.dopomoga.aidtools.airtable.dto.response.AirtableMinusTableResponse;
-import am.dopomoga.aidtools.airtable.dto.response.AirtableRefugeesTableResponse;
-import am.dopomoga.aidtools.airtable.dto.response.AirtableSupportTableResponse;
+import am.dopomoga.aidtools.airtable.dto.response.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,5 +39,9 @@ public interface AirtableTablesClient {
     )
     AirtableRefugeesTableResponse getRefugees(@PathVariable String baseid, @RequestParam String offset, @RequestParam String filterByFormula);
 
-
+    @RequestMapping(
+            method = RequestMethod.GET,
+            value = "/{baseid}/Plus"
+    )
+    AirtablePlusTableResponse getPlus(@PathVariable String baseid, @RequestParam String offset, @RequestParam String filterByFormula);
 }

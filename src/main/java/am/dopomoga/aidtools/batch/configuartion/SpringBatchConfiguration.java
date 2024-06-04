@@ -1,12 +1,16 @@
 package am.dopomoga.aidtools.batch.configuartion;
 
+import am.dopomoga.aidtools.airtable.dto.AirtableBlankableItem;
 import am.dopomoga.aidtools.airtable.dto.TableDataDto;
 import am.dopomoga.aidtools.airtable.dto.response.AirtableTableListFunction;
 import am.dopomoga.aidtools.airtable.restclient.AirtableTablesClient;
-import am.dopomoga.aidtools.batch.process.*;
+import am.dopomoga.aidtools.batch.process.AirtableImportItemProcessor;
+import am.dopomoga.aidtools.batch.process.RefugeeFamilyIdsItemProcessor;
 import am.dopomoga.aidtools.batch.reader.AirtableRestItemReader;
+import am.dopomoga.aidtools.model.document.AbstractDocument;
 import am.dopomoga.aidtools.model.document.RefugeeDocument;
-import am.dopomoga.aidtools.service.AirtableDatabaseService;
+import am.dopomoga.aidtools.model.mapper.ModelMapper;
+import am.dopomoga.aidtools.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -28,7 +32,11 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.time.LocalDate;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 @Configuration
 @EnableBatchProcessing
@@ -41,21 +49,35 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
 
     @Bean
     public Job importJob(JobRepository jobRepository,
-                         GoodImportItemProcessor goodImportItemProcessor,
-                         RefugeeImportItemProcessor refugeeImportItemProcessor,
-                         RefugeeFamilyIdsItemProcessor refugeeFamilyIdsItemProcessor,
-                         SupportImportItemProcessor supportImportItemProcessor,
-                         MinusImportItemProcessor minusImportItemProcessor) {
-        Step goodsImport = airtableTableDataStep("GoodsImport", airtableTablesClient::getGoods,
-                goodImportItemProcessor, jobRepository);
-        Step refugeesImport = airtableTableDataStep("RefugeesImport", airtableTablesClient::getRefugees,
-                refugeeImportItemProcessor, jobRepository);
-        Step refugeesFamilyIds = fillRefugeesFamilyIdsStep(refugeeFamilyIdsItemProcessor, jobRepository);
-        Step supportImport = airtableTableDataStep("SupportImport", airtableTablesClient::getSupport,
-                supportImportItemProcessor, jobRepository);
-        Step minusImport = airtableTableDataStep("MinusImport", airtableTablesClient::getMinus,
-                minusImportItemProcessor, jobRepository);
+                         ModelMapper mapper,
+                         GoodService goodService,
+                         RefugeeService refugeeService,
+                         SupportService supportService,
+                         MinusService minusService,
+                         PlusService plusService,
+                         RefugeeFamilyIdsItemProcessor refugeeFamilyIdsItemProcessor) {
 
+        Step goodsImport = airtableTableDataImportStep("GoodsImport", airtableTablesClient::getGoods,
+                importItemProcessorDatabaseDateAware(mapper::map, goodService::prepareFromRawAirtableModel),
+                jobRepository);
+
+        Step refugeesImport = airtableTableDataImportStep("RefugeesImport", airtableTablesClient::getRefugees,
+                importItemProcessor(mapper::map, refugeeService::prepareFromRawAirtableModel),
+                jobRepository);
+
+        Step refugeesFamilyIds = fillRefugeesFamilyIdsStep(refugeeFamilyIdsItemProcessor, jobRepository);
+
+        Step supportImport = airtableTableDataImportStep("SupportImport", airtableTablesClient::getSupport,
+                importItemProcessor(mapper::map, supportService::prepareFromRawAirtableModel),
+                jobRepository);
+
+        Step minusImport = airtableTableDataImportStep("MinusImport", airtableTablesClient::getMinus,
+                importItemProcessor(mapper::map, minusService::prepareFromRawAirtableModel),
+                jobRepository);
+
+        Step plusImport = airtableTableDataImportStep("PlusImport", airtableTablesClient::getPlus,
+                importItemProcessor(mapper::map, plusService::prepareFromRawAirtableModel),
+                jobRepository);
 
         return new JobBuilder("AirtableDataImportJob", jobRepository)
                 .start(goodsImport)
@@ -63,6 +85,7 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 .next(refugeesFamilyIds)
                 .next(supportImport)
                 .next(minusImport)
+                .next(plusImport)
 
                 .build();
     }
@@ -91,10 +114,11 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 .build();
     }
 
-    private <I, O> Step airtableTableDataStep(String name,
-                                              AirtableTableListFunction<I> dataSupplyingMethod,
-                                              ItemProcessor<TableDataDto<I>, O> processor,
-                                              JobRepository jobRepository) {
+    private <I extends AirtableBlankableItem, O extends AbstractDocument<O>> Step airtableTableDataImportStep(
+            String name,
+            AirtableTableListFunction<I> dataSupplyingMethod,
+            ItemProcessor<TableDataDto<I>, O> processor,
+            JobRepository jobRepository) {
         return new StepBuilder(name, jobRepository)
                 .<TableDataDto<I>, O>chunk(10, getTransactionManager())
                 .reader(new AirtableRestItemReader<>(name, dataSupplyingMethod, this.airtableDatabaseService))
@@ -107,6 +131,20 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 .readerIsTransactionalQueue()
                 .allowStartIfComplete(true)
                 .build();
+    }
+
+    private <I extends AirtableBlankableItem, O extends AbstractDocument<O>> ItemProcessor<TableDataDto<I>, O> importItemProcessor(
+            Function<I, O> simpleDataMapper,
+            UnaryOperator<O> beforeSave
+    ) {
+        return new AirtableImportItemProcessor<>(simpleDataMapper, null, beforeSave);
+    }
+
+    private <I extends AirtableBlankableItem, O extends AbstractDocument<O>> ItemProcessor<TableDataDto<I>, O> importItemProcessorDatabaseDateAware(
+            BiFunction<I, LocalDate, O> dataMapperWithDatabaseDate,
+            UnaryOperator<O> beforeSave
+    ) {
+        return new AirtableImportItemProcessor<>(null, dataMapperWithDatabaseDate, beforeSave);
     }
 
     @Bean

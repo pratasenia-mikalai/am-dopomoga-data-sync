@@ -38,4 +38,8 @@ public class RefugeeDocument extends AbstractDocument<RefugeeDocument> {
         originAirtableIds.add(airtableId);
     }
 
+    @Override
+    public void setOriginAirtableId(String originAirtableId) {
+        addOriginAirtableId(originAirtableId);
+    }
 }
