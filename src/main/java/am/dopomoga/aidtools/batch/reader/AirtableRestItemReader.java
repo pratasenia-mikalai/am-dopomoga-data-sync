@@ -8,6 +8,7 @@ import am.dopomoga.aidtools.batch.JobParameters;
 import am.dopomoga.aidtools.batch.StepExecutionContextAccess;
 import am.dopomoga.aidtools.controller.dto.AirtableDatabaseApiModel;
 import am.dopomoga.aidtools.service.AirtableDatabaseService;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepExecutionListener;
@@ -15,6 +16,7 @@ import org.springframework.batch.item.*;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class AirtableRestItemReader<T> extends StepExecutionContextAccess implem
     private final String stepName;
     private final AirtableTableListFunction<T> dataSupplyingMethod;
     private final AirtableDatabaseService databaseService;
+    private final long apiRetryDelaySeconds;
 
     private Iterator<TableDataDto<T>> dataIterator;
     private String nextBatchOffset = null;
@@ -30,7 +33,7 @@ public class AirtableRestItemReader<T> extends StepExecutionContextAccess implem
     private int databaseRecordCounter = 0;
 
     @Override
-    public TableDataDto<T> read() throws UnexpectedInputException, ParseException, NonTransientResourceException {
+    public TableDataDto<T> read() throws UnexpectedInputException, ParseException, NonTransientResourceException, InterruptedException {
         if (this.dataIterator == null || !dataIterator.hasNext()) {
             if (this.lastRestBatch && isDatabaseLast()) {
                 logRecordsNumber();
@@ -52,8 +55,7 @@ public class AirtableRestItemReader<T> extends StepExecutionContextAccess implem
                 String offset = getAirtableTableOffset();
                 String lastModifiedDate = getLastModifiedDate();
 
-                response = this.dataSupplyingMethod.get(databaseId, offset,
-                        AirtableRequestUtils.lastModifiedDateParam(lastModifiedDate));
+                response = getDataResponse(databaseId, offset, lastModifiedDate);
 
                 recordsExist = response.getRecords() != null && !response.getRecords().isEmpty();
                 if (!recordsExist) {
@@ -79,6 +81,16 @@ public class AirtableRestItemReader<T> extends StepExecutionContextAccess implem
                     .apply(it -> it.setActualStartDateFromDatabase(getDatabaseActualStartDate()));
         }
         return null;
+    }
+
+    private AbstractAirtableTableResponse<T> getDataResponse(String databaseId, String offset, String lastModifiedDate) throws InterruptedException {
+        do {
+            try {
+                return this.dataSupplyingMethod.get(databaseId, offset, AirtableRequestUtils.lastModifiedDateParam(lastModifiedDate));
+            } catch (FeignException.TooManyRequests ex) {
+                TimeUnit.SECONDS.sleep(this.apiRetryDelaySeconds);
+            }
+        } while (true);
     }
 
     private void loadNextAirtableDatabaseStepContext() {

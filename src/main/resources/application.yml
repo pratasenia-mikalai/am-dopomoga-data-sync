@@ -29,5 +29,6 @@ springdoc:
   packages-to-scan: am.dopomoga.aidtools.controller
 
 airtable:
+  api-retry-delay-seconds: 30
   token:
     read-only: ${AIRTABLE_TOKEN_READ_ONLY}

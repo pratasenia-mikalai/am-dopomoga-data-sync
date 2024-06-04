@@ -24,6 +24,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.data.builder.MongoItemReaderBuilder;
 import org.springframework.batch.item.data.builder.MongoItemWriterBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -46,6 +47,8 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
     private final AirtableTablesClient airtableTablesClient;
     private final AirtableDatabaseService airtableDatabaseService;
     private final MongoTemplate mongoTemplate;
+    @Value("${airtable.api-retry-delay-seconds}")
+    private final long airtableApiRetryDelaySeconds;
 
     @Bean
     public Job importJob(JobRepository jobRepository,
@@ -114,14 +117,14 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 .build();
     }
 
-    private <I extends AirtableBlankableItem, O extends AbstractDocument<O>> Step airtableTableDataImportStep(
+    private <I, O> Step airtableTableDataImportStep(
             String name,
             AirtableTableListFunction<I> dataSupplyingMethod,
             ItemProcessor<TableDataDto<I>, O> processor,
             JobRepository jobRepository) {
         return new StepBuilder(name, jobRepository)
                 .<TableDataDto<I>, O>chunk(10, getTransactionManager())
-                .reader(new AirtableRestItemReader<>(name, dataSupplyingMethod, this.airtableDatabaseService))
+                .reader(new AirtableRestItemReader<>(name, dataSupplyingMethod, this.airtableDatabaseService, this.airtableApiRetryDelaySeconds))
                 .processor(processor)
                 .writer(
                         new MongoItemWriterBuilder<O>()
