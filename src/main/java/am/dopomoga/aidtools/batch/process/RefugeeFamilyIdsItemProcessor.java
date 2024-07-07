@@ -20,6 +20,7 @@ public class RefugeeFamilyIdsItemProcessor implements ItemProcessor<RefugeeDocum
         List<RefugeeDocument> family = service.findFamilyByAirtableOriginalFamilyIds(item.getAirtableOriginalFamilyIds());
         List<UUID> familyIds = family.stream().map(RefugeeDocument::getId).toList();
         item.setFamilyIds(familyIds);
+        item.getFamilyIds().add(item.getId());
         return item;
     }
 }
