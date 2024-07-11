@@ -2,6 +2,7 @@ package am.dopomoga.aidtools.batch;
 
 public interface BatchJobParameters {
 
+    String JOB_START_TIME = "job_start_time";
     String AIRTABLE_BASE_ID = "airtable_base_id";
     String ACTUAL_START_DATE = "actual_start_date";
     String AIRTABLE_NEXT_BASE_ID = "airtable_next_base_id";
