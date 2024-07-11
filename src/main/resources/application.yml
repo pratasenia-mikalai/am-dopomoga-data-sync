@@ -30,5 +30,7 @@ springdoc:
 
 airtable:
   api-retry-delay-seconds: 30
+  api-request-time-interval-millis: 250
   token:
     read-only: ${AIRTABLE_TOKEN_READ_ONLY}
+    write: ${AIRTABLE_TOKEN_WRITE}

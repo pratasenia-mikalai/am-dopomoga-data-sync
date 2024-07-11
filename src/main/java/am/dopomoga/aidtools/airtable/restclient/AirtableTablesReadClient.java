@@ -9,11 +9,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
-        name = "airtableGoodsClient",
+        name = "airtableReadClient",
         url = "https://api.airtable.com/v0",
         configuration = AirtableReadOnlyConfiguration.class
 )
-public interface AirtableTablesClient {
+public interface AirtableTablesReadClient {
 
     @RequestMapping(
             method = RequestMethod.GET,

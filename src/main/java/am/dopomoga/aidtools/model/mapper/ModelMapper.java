@@ -9,7 +9,9 @@ import am.dopomoga.aidtools.model.entity.PermissionLevel;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.TreeMap;
 
 @Component
 public class ModelMapper {
@@ -111,8 +113,33 @@ public class ModelMapper {
         );
     }
 
+    public GoodDto map(final GoodDocument goodDocument) {
+        return goodDocument.let(it -> new GoodDto(
+                it.getName(),
+                it.getType(),
+                it.getUnitWeightKg(),
+                lastOrNull(it.getUnitEstimatedPrices()),
+                it.getNameId()
+        ));
+    }
+
+    public RefugeeDto mapWithoutFamily(final RefugeeDocument refugeeDocument) {
+        return refugeeDocument.let(it -> new RefugeeDto(
+                it.getName(),
+                it.getGender(),
+                it.getDateOfBirth(),
+                it.getArrivalDate(),
+                it.getRefugeeStatus(),
+                Collections.emptyList()
+        ));
+    }
+
     private <E> E firstOrNull(List<E> list) {
         return list == null || list.isEmpty() ? null : list.get(0);
+    }
+
+    private <E> E lastOrNull(TreeMap<String, E> map) {
+        return map != null && map.lastEntry() != null ? map.lastEntry().getValue() : null;
     }
 
 }

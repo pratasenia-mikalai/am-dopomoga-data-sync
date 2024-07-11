@@ -4,14 +4,13 @@ import am.dopomoga.aidtools.airtable.AirtableRequestUtils;
 import am.dopomoga.aidtools.airtable.dto.TableDataDto;
 import am.dopomoga.aidtools.airtable.dto.response.AbstractAirtableTableResponse;
 import am.dopomoga.aidtools.airtable.dto.response.AirtableTableListFunction;
-import am.dopomoga.aidtools.batch.JobParameters;
+import am.dopomoga.aidtools.batch.BatchJobParameters;
 import am.dopomoga.aidtools.batch.StepExecutionContextAccess;
 import am.dopomoga.aidtools.controller.dto.AirtableDatabaseApiModel;
 import am.dopomoga.aidtools.service.AirtableDatabaseService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.*;
 
 import java.util.Iterator;
@@ -20,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
-public class AirtableRestItemReader<T> extends StepExecutionContextAccess implements ItemReader<TableDataDto<T>>, StepExecutionListener {
+public class AirtableRestItemReader<T> extends StepExecutionContextAccess implements ItemReader<TableDataDto<T>> {
 
     private final String stepName;
     private final AirtableTableListFunction<T> dataSupplyingMethod;
@@ -97,26 +96,26 @@ public class AirtableRestItemReader<T> extends StepExecutionContextAccess implem
         this.lastRestBatch = false;
         logRecordsNumber();
 
-        ExecutionContext jobExecutionContext = stepExecutionContext();
-        jobExecutionContext.remove(JobParameters.AIRTABLE_TABLE_OFFSET);
+        ExecutionContext stepExecutionContext = stepExecutionContext();
+        stepExecutionContext.remove(BatchJobParameters.AIRTABLE_TABLE_OFFSET);
 
         AirtableDatabaseApiModel nextBase;
-        if (!jobExecutionContext.containsKey(JobParameters.AIRTABLE_BASE_ID)) {
+        if (!stepExecutionContext.containsKey(BatchJobParameters.AIRTABLE_BASE_ID)) {
             nextBase = databaseService.getFirstNonProcessedBase();
         } else {
-            String nextBaseId = jobExecutionContext.getString(JobParameters.AIRTABLE_NEXT_BASE_ID);
+            String nextBaseId = stepExecutionContext.getString(BatchJobParameters.AIRTABLE_NEXT_BASE_ID);
             nextBase = databaseService.getDatabase(nextBaseId);
         }
         if (nextBase == null) {
             throw new NoSuchElementException();
         }
 
-        jobExecutionContext.put(JobParameters.AIRTABLE_BASE_ID, nextBase.id());
-        jobExecutionContext.put(JobParameters.ACTUAL_START_DATE, nextBase.actualStartDate().toString());
+        stepExecutionContext.put(BatchJobParameters.AIRTABLE_BASE_ID, nextBase.id());
+        stepExecutionContext.put(BatchJobParameters.ACTUAL_START_DATE, nextBase.actualStartDate().toString());
         if (nextBase.nextDatabaseId() != null) {
-            jobExecutionContext.put(JobParameters.AIRTABLE_NEXT_BASE_ID, nextBase.nextDatabaseId());
+            stepExecutionContext.put(BatchJobParameters.AIRTABLE_NEXT_BASE_ID, nextBase.nextDatabaseId());
         } else {
-            jobExecutionContext.remove(JobParameters.AIRTABLE_NEXT_BASE_ID);
+            stepExecutionContext.remove(BatchJobParameters.AIRTABLE_NEXT_BASE_ID);
         }
         log.info("Reading from database \"{}\"", nextBase.name());
     }
