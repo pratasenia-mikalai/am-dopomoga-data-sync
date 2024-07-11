@@ -66,6 +66,7 @@ public class ModelMapper {
         return new GoodDocument().apply(it -> {
             it.setName(goodDto.name());
             it.setType(goodDto.type());
+            it.setUnit(goodDto.unit());
             it.setNameId(goodDto.nameId());
             it.setUnitWeightKg(goodDto.unitWeightKg());
             it.addUnitEstimatedPrice(actualStartDate.toString(), goodDto.unitEstimatedPrice());
@@ -77,6 +78,11 @@ public class ModelMapper {
                     it.setName(refugeeDto.name());
                     it.setGender(refugeeDto.gender());
                     it.setDateOfBirth(refugeeDto.dateOfBirth());
+                    it.setIdCard(refugeeDto.idCard());
+                    it.setCitizenship(refugeeDto.citizenship());
+                    it.setPhone(refugeeDto.phone());
+                    it.setLocalAddress(refugeeDto.localAddress());
+                    it.setArrivalPlace(refugeeDto.arrivalPlace());
                     it.setArrivalDate(refugeeDto.arrivalDate());
                     it.setRefugeeStatus(refugeeDto.refugeeStatus());
                     it.setAirtableOriginalFamilyIds(refugeeDto.familyIds());
@@ -117,9 +123,10 @@ public class ModelMapper {
         return goodDocument.let(it -> new GoodDto(
                 it.getName(),
                 it.getType(),
+                it.getUnit(),
                 it.getUnitWeightKg(),
                 lastOrNull(it.getUnitEstimatedPrices()),
-                it.getNameId()
+                null
         ));
     }
 
@@ -128,6 +135,11 @@ public class ModelMapper {
                 it.getName(),
                 it.getGender(),
                 it.getDateOfBirth(),
+                it.getIdCard(),
+                it.getCitizenship(),
+                it.getPhone(),
+                it.getLocalAddress(),
+                it.getArrivalPlace(),
                 it.getArrivalDate(),
                 it.getRefugeeStatus(),
                 Collections.emptyList()

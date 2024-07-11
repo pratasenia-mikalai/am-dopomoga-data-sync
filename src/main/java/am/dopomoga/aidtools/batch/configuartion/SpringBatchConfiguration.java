@@ -24,6 +24,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.support.DefaultBatchConfiguration;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -98,6 +99,7 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 jobRepository);
 
         return new JobBuilder("AirtableDataImportJob", jobRepository)
+                .incrementer(new RunIdIncrementer())
                 .start(goodsImport)
                 .next(refugeesImport)
                 .next(refugeesFamilyIds)
@@ -110,20 +112,19 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
     @Bean
     public Job exportJob(JobRepository jobRepository,
                          ModelMapper mapper,
-                         GoodService goodService,
                          RefugeeService refugeeService) {
 
         Step goodsExport = airtableTableDataExportStep("GoodExport", GoodDocument.class, mapper::map,
                 airtableTablesWriteClient::saveGoods, null,
                 jobRepository);
 
-
         Step refugeesExport = airtableTableDataExportStep("RefugeesExport", RefugeeDocument.class, mapper::mapWithoutFamily,
-                airtableTablesWriteClient::saveRefugees, null, // TODO save new IDs
+                airtableTablesWriteClient::saveRefugees, refugeeService::saveNewAirtableId,
                 jobRepository);
 
 
         return new JobBuilder("AirtableDataExportJob", jobRepository)
+                .incrementer(new RunIdIncrementer())
                 .start(goodsExport)
                 .next(refugeesExport)
 
@@ -169,7 +170,7 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
             Class<I> mongoDocumentClass,
             Function<I, O> mappingFunction,
             AirtableTableSaveFunction<O, R> dataSaveMethod,
-            Consumer<AbstractAirtableTableResponse<R>> responseItemPostProcessor,
+            Consumer<TableDataDto<R>> responseItemPostProcessor,
             JobRepository jobRepository
     ) {
         return new StepBuilder(name, jobRepository)

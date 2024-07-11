@@ -5,8 +5,7 @@ import am.dopomoga.aidtools.service.RefugeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.ItemProcessor;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class RefugeeFamilyIdsItemProcessor implements ItemProcessor<RefugeeDocument, RefugeeDocument> {
@@ -16,9 +15,12 @@ public class RefugeeFamilyIdsItemProcessor implements ItemProcessor<RefugeeDocum
     @Override
     public RefugeeDocument process(RefugeeDocument item) throws Exception {
         List<RefugeeDocument> family = service.findFamilyByAirtableOriginalFamilyIds(item.getAirtableOriginalFamilyIds());
-        List<UUID> familyIds = family.stream().map(RefugeeDocument::getId).toList();
+
+        Set<UUID> familyIds = new HashSet<>();
+        family.stream().map(RefugeeDocument::getId).forEach(familyIds::add);
+        familyIds.add(item.getId());
+
         item.setFamilyIds(familyIds);
-        item.getFamilyIds().add(item.getId());
         return item;
     }
 }

@@ -13,7 +13,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v0/base")
+@RequestMapping("/api/v0/bases")
 public class AirtableDatabaseController {
 
     private final AirtableDatabaseService airtableDatabaseService;

@@ -1,5 +1,7 @@
 package am.dopomoga.aidtools.service;
 
+import am.dopomoga.aidtools.airtable.dto.RefugeeDto;
+import am.dopomoga.aidtools.airtable.dto.TableDataDto;
 import am.dopomoga.aidtools.model.document.RefugeeDocument;
 import am.dopomoga.aidtools.repository.mongo.RefugeeRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,14 @@ public class RefugeeService {
 
     public RefugeeDocument findByOriginAirtableId(String originAirtableId) {
         return refugeeRepository.findByOriginAirtableIds(originAirtableId);
+    }
+
+    public void saveNewAirtableId(TableDataDto<RefugeeDto> dto) {
+        RefugeeDocument refugeeDocument = refugeeRepository.findByNameAndDateOfBirth(dto.getFields().name(), dto.getFields().dateOfBirth());
+        if (refugeeDocument == null) return;
+
+        refugeeDocument.setNewAirtableId(dto.getId());
+        refugeeRepository.save(refugeeDocument);
     }
 
 }

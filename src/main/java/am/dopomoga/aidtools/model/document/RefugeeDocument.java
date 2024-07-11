@@ -1,6 +1,7 @@
 package am.dopomoga.aidtools.model.document;
 
 import am.dopomoga.aidtools.model.MongoCollectionsConst;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
@@ -25,13 +26,19 @@ public class RefugeeDocument extends AbstractDocument<RefugeeDocument> {
     private String gender;
     @Field(targetType = FieldType.STRING)
     private LocalDate dateOfBirth;
+    private String idCard;
+    private String citizenship;
+    private String phone;
+    private String localAddress;
+    private String arrivalPlace;
     @Field(targetType = FieldType.STRING)
     private LocalDate arrivalDate;
     private Boolean refugeeStatus;
     @Indexed
     private Set<String> originAirtableIds;
-    private List<UUID> familyIds;
+    private Set<UUID> familyIds;
     private List<String> airtableOriginalFamilyIds;
+    private String newAirtableId;
 
     public void addOriginAirtableId(String airtableId) {
         if (originAirtableIds == null) originAirtableIds = new HashSet<>();

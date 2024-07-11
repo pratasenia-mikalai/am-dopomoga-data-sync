@@ -13,6 +13,16 @@ public record RefugeeDto(
         String gender,
         @JsonProperty("DOB")
         LocalDate dateOfBirth,
+        @JsonProperty("ID Card")
+        String idCard,
+        @JsonProperty("Citizenship")
+        String citizenship,
+        @JsonProperty("Phone")
+        String phone,
+        @JsonProperty("Local Adress")
+        String localAddress,
+        @JsonProperty("Arrival place")
+        String arrivalPlace,
         @JsonProperty("Arrival date")
         LocalDate arrivalDate,
         @JsonProperty("Refuge status")
@@ -25,3 +35,4 @@ public record RefugeeDto(
         return this.name == null || this.name.isBlank();
     }
 }
+

@@ -1,5 +1,6 @@
 package am.dopomoga.aidtools.batch.writer;
 
+import am.dopomoga.aidtools.airtable.dto.TableDataDto;
 import am.dopomoga.aidtools.airtable.dto.TableDataSaveDto;
 import am.dopomoga.aidtools.airtable.dto.request.AirtableTableSaveRequest;
 import am.dopomoga.aidtools.airtable.dto.request.AirtableTableSaveFunction;
@@ -26,7 +27,10 @@ public class AirtableRestItemWriter<O, R> implements ItemWriter<TableDataSaveDto
 
     private final long requestIntervalMillis;
     private final AirtableTableSaveFunction<O, R> restWriteFunction;
-    private final Consumer<AbstractAirtableTableResponse<R>> responseItemPostProcessor;
+    /**
+     * Nullable
+     */
+    private final Consumer<TableDataDto<R>> responseItemPostProcessor;
 
     @Override
     public void beforeStep(StepExecution stepExecution) {
@@ -45,6 +49,8 @@ public class AirtableRestItemWriter<O, R> implements ItemWriter<TableDataSaveDto
         LAST_REQUEST_TIME.set(System.currentTimeMillis());
         AbstractAirtableTableResponse<R> response = restWriteFunction.send(parameters.getString(BatchJobParameters.AIRTABLE_BASE_ID), apiSaveRequest);
 
-        responseItemPostProcessor.accept(response);
+        if (responseItemPostProcessor != null) {
+            response.getRecords().forEach(responseItemPostProcessor);
+        }
     }
 }

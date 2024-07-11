@@ -23,6 +23,7 @@ public class GoodDocument extends AbstractDocument<GoodDocument> {
 
     private String name;
     private String type;
+    private String unit;
     @Indexed
     private String nameId;
     @Indexed
