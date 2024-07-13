@@ -7,7 +7,6 @@ import am.dopomoga.aidtools.airtable.dto.request.AirtableTableSaveFunction;
 import am.dopomoga.aidtools.airtable.dto.response.AbstractAirtableTableResponse;
 import am.dopomoga.aidtools.batch.BatchJobParameters;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-@Slf4j// TODO logging
 @RequiredArgsConstructor
 public class AirtableRestItemWriter<O, R> implements ItemWriter<TableDataSaveDto<O>>, StepExecutionListener {
 

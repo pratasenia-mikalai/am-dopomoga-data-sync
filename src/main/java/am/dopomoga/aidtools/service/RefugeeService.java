@@ -43,4 +43,9 @@ public class RefugeeService {
         refugeeRepository.save(refugeeDocument);
     }
 
+    public List<String> findFamilyNewAirtableIds(RefugeeDocument refugeeDocument) {
+        return refugeeRepository.findAllById(refugeeDocument.getFamilyIds()).stream()
+                .map(RefugeeDocument::getNewAirtableId).toList();
+    }
+
 }

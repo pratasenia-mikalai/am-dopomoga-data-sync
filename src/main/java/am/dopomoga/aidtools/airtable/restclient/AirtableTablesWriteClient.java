@@ -3,6 +3,7 @@ package am.dopomoga.aidtools.airtable.restclient;
 import am.dopomoga.aidtools.airtable.AirtableWriteConfiguration;
 import am.dopomoga.aidtools.airtable.dto.GoodDto;
 import am.dopomoga.aidtools.airtable.dto.RefugeeDto;
+import am.dopomoga.aidtools.airtable.dto.RefugeeFamilyDto;
 import am.dopomoga.aidtools.airtable.dto.request.AirtableTableSaveRequest;
 import am.dopomoga.aidtools.airtable.dto.response.AirtableGoodsTableResponse;
 import am.dopomoga.aidtools.airtable.dto.response.AirtableRefugeesTableResponse;
@@ -31,5 +32,11 @@ public interface AirtableTablesWriteClient {
             value = "/{baseid}/Refugees"
     )
     AirtableRefugeesTableResponse saveRefugees(@PathVariable String baseid, @RequestBody AirtableTableSaveRequest<RefugeeDto> body);
+
+    @RequestMapping(
+            method = RequestMethod.PATCH,
+            value = "/{baseid}/Refugees"
+    )
+    AirtableRefugeesTableResponse patchRefugeeFamilies(@PathVariable String baseid, @RequestBody AirtableTableSaveRequest<RefugeeFamilyDto> body);
 
 }

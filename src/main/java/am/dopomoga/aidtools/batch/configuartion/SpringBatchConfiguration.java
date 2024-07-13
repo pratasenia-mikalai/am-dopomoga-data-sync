@@ -10,6 +10,7 @@ import am.dopomoga.aidtools.airtable.restclient.AirtableTablesReadClient;
 import am.dopomoga.aidtools.airtable.restclient.AirtableTablesWriteClient;
 import am.dopomoga.aidtools.batch.process.AirtableExportMappingItemProcessor;
 import am.dopomoga.aidtools.batch.process.AirtableImportItemProcessor;
+import am.dopomoga.aidtools.batch.process.FamilyUpdateItemProcessor;
 import am.dopomoga.aidtools.batch.process.RefugeeFamilyIdsItemProcessor;
 import am.dopomoga.aidtools.batch.reader.AirtableRestItemReader;
 import am.dopomoga.aidtools.batch.writer.AirtableRestItemWriter;
@@ -114,12 +115,19 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                          ModelMapper mapper,
                          RefugeeService refugeeService) {
 
-        Step goodsExport = airtableTableDataExportStep("GoodExport", GoodDocument.class, mapper::map,
+        Step goodsExport = airtableTableDataExportStep("GoodExport", GoodDocument.class,
+                exportMappingItemProcessor(mapper::map),
                 airtableTablesWriteClient::saveGoods, null,
                 jobRepository);
 
-        Step refugeesExport = airtableTableDataExportStep("RefugeesExport", RefugeeDocument.class, mapper::mapWithoutFamily,
+        Step refugeesExport = airtableTableDataExportStep("RefugeesExport", RefugeeDocument.class,
+                exportMappingItemProcessor(mapper::mapWithoutFamily),
                 airtableTablesWriteClient::saveRefugees, refugeeService::saveNewAirtableId,
+                jobRepository);
+
+        Step refugeesFamilyUpdate = airtableTableDataExportStep("RefugeesFamilyUpdate", RefugeeDocument.class,
+                new FamilyUpdateItemProcessor(refugeeService),
+                airtableTablesWriteClient::patchRefugeeFamilies, null,
                 jobRepository);
 
 
@@ -127,7 +135,7 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 .incrementer(new RunIdIncrementer())
                 .start(goodsExport)
                 .next(refugeesExport)
-
+                .next(refugeesFamilyUpdate)
                 .build();
     }
 
@@ -168,7 +176,7 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
     private <I, O, R> Step airtableTableDataExportStep(
             String name,
             Class<I> mongoDocumentClass,
-            Function<I, O> mappingFunction,
+            ItemProcessor<I, TableDataSaveDto<O>> itemProcessor,
             AirtableTableSaveFunction<O, R> dataSaveMethod,
             Consumer<TableDataDto<R>> responseItemPostProcessor,
             JobRepository jobRepository
@@ -176,13 +184,17 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
         return new StepBuilder(name, jobRepository)
                 .<I, TableDataSaveDto<O>>chunk(10, getTransactionManager())
                 .reader(mongoItemReader(mongoDocumentClass))
-                .processor(new AirtableExportMappingItemProcessor<>(mappingFunction))
+                .processor(itemProcessor)
                 .writer(
                     new AirtableRestItemWriter<>(this.airtableApiRequestIntervalMillis, dataSaveMethod, responseItemPostProcessor)
                 )
                 .readerIsTransactionalQueue()
                 .allowStartIfComplete(true)
                 .build();
+    }
+
+    private <I, O> ItemProcessor<I, TableDataSaveDto<O>> exportMappingItemProcessor(Function<I, O> mappingFunction) {
+        return new AirtableExportMappingItemProcessor<>(mappingFunction);
     }
 
     private <T> ItemReader<T> mongoItemReader(Class<T> documentClass) {

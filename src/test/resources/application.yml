@@ -1,4 +1,6 @@
 airtable:
+  api-retry-delay-seconds: 30
+  api-request-time-interval-millis: 250
   token:
     read-only: "dummy"
     write: "dummy"
