@@ -38,6 +38,7 @@ public class RefugeeDocument extends AbstractDocument<RefugeeDocument> {
     private Set<String> originAirtableIds;
     private Set<UUID> familyIds;
     private List<String> airtableOriginalFamilyIds;
+    private Boolean cardHolder;
     private String newAirtableId;
 
     public void addOriginAirtableId(String airtableId) {

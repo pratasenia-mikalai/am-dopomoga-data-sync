@@ -1,6 +1,7 @@
 package am.dopomoga.aidtools.airtable.dto;
 
 import am.dopomoga.aidtools.model.FunctionalModel;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
@@ -28,7 +29,10 @@ public record RefugeeDto(
         @JsonProperty("Refuge status")
         Boolean refugeeStatus,
         @JsonProperty("Family")
-        List<String> familyIds
+        List<String> familyIds,
+        @JsonProperty("Card Holder")
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Boolean cardHolder
 ) implements FunctionalModel<RefugeeDto>, AirtableBlankableItem {
     @Override
     public boolean isBlank() {

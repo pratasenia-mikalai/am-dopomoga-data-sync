@@ -4,14 +4,13 @@ import am.dopomoga.aidtools.airtable.dto.AirtableBlankableItem;
 import am.dopomoga.aidtools.airtable.dto.TableDataDto;
 import am.dopomoga.aidtools.airtable.dto.TableDataSaveDto;
 import am.dopomoga.aidtools.airtable.dto.request.AirtableTableSaveFunction;
-import am.dopomoga.aidtools.airtable.dto.response.AbstractAirtableTableResponse;
 import am.dopomoga.aidtools.airtable.dto.response.AirtableTableListFunction;
 import am.dopomoga.aidtools.airtable.restclient.AirtableTablesReadClient;
 import am.dopomoga.aidtools.airtable.restclient.AirtableTablesWriteClient;
 import am.dopomoga.aidtools.batch.process.AirtableExportMappingItemProcessor;
 import am.dopomoga.aidtools.batch.process.AirtableImportItemProcessor;
 import am.dopomoga.aidtools.batch.process.FamilyUpdateItemProcessor;
-import am.dopomoga.aidtools.batch.process.RefugeeFamilyIdsItemProcessor;
+import am.dopomoga.aidtools.batch.process.RefugeeLinkedPropertiesItemProcessor;
 import am.dopomoga.aidtools.batch.reader.AirtableRestItemReader;
 import am.dopomoga.aidtools.batch.writer.AirtableRestItemWriter;
 import am.dopomoga.aidtools.model.document.AbstractDocument;
@@ -85,7 +84,7 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 importItemProcessor(mapper::map, refugeeService::prepareFromRawAirtableModel),
                 jobRepository);
 
-        Step refugeesFamilyIds = fillRefugeesFamilyIdsStep(refugeeService, jobRepository);
+        Step refugeesLinkedProperties = fillRefugeesLinkedPropertiesStep(refugeeService, supportService, jobRepository);
 
         Step supportImport = airtableTableDataImportStep("SupportImport", airtableTablesReadClient::getSupport,
                 importItemProcessor(mapper::map, supportService::prepareFromRawAirtableModel),
@@ -103,8 +102,8 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 .incrementer(new RunIdIncrementer())
                 .start(goodsImport)
                 .next(refugeesImport)
-                .next(refugeesFamilyIds)
                 .next(supportImport)
+                .next(refugeesLinkedProperties)
                 .next(minusImport)
                 .next(plusImport)
                 .build();
@@ -130,7 +129,6 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 airtableTablesWriteClient::patchRefugeeFamilies, null,
                 jobRepository);
 
-
         return new JobBuilder("AirtableDataExportJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(goodsExport)
@@ -139,11 +137,11 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
                 .build();
     }
 
-    private Step fillRefugeesFamilyIdsStep(RefugeeService refugeeService, JobRepository jobRepository) {
+    private Step fillRefugeesLinkedPropertiesStep(RefugeeService refugeeService, SupportService supportService, JobRepository jobRepository) {
         return new StepBuilder("RefugeesFamilyIds", jobRepository)
                 .<RefugeeDocument, RefugeeDocument>chunk(10, getTransactionManager())
                 .reader(mongoItemReader(RefugeeDocument.class))
-                .processor(new RefugeeFamilyIdsItemProcessor(refugeeService))
+                .processor(new RefugeeLinkedPropertiesItemProcessor(refugeeService, supportService))
                 .writer(
                         new MongoItemWriterBuilder<RefugeeDocument>()
                                 .template(this.mongoTemplate)

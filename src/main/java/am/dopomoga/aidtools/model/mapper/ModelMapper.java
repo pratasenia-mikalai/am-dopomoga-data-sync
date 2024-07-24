@@ -86,6 +86,7 @@ public class ModelMapper {
                     it.setArrivalDate(refugeeDto.arrivalDate());
                     it.setRefugeeStatus(refugeeDto.refugeeStatus());
                     it.setAirtableOriginalFamilyIds(refugeeDto.familyIds());
+                    it.setCardHolder(refugeeDto.cardHolder());
                 }
         );
     }
@@ -142,7 +143,8 @@ public class ModelMapper {
                 it.getArrivalPlace(),
                 it.getArrivalDate(),
                 it.getRefugeeStatus(),
-                Collections.emptyList()
+                Collections.emptyList(),
+                it.getCardHolder()
         ));
     }
 

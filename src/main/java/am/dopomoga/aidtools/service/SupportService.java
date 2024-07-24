@@ -6,6 +6,9 @@ import am.dopomoga.aidtools.repository.mongo.SupportRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class SupportService {
@@ -15,6 +18,10 @@ public class SupportService {
 
     public SupportDocument findByOriginAirtableId(String originAirtableId) {
         return supportRepository.findByOriginAirtableId(originAirtableId);
+    }
+
+    public List<SupportDocument> getSupportsByRefugee(UUID refugeeId) {
+        return supportRepository.findByRefugeeId(refugeeId);
     }
 
     public SupportDocument prepareFromRawAirtableModel(SupportDocument raw) {
