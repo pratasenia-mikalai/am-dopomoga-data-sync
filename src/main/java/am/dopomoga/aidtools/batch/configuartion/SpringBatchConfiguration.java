@@ -138,7 +138,7 @@ public class SpringBatchConfiguration extends DefaultBatchConfiguration {
     }
 
     private Step fillRefugeesLinkedPropertiesStep(RefugeeService refugeeService, SupportService supportService, JobRepository jobRepository) {
-        return new StepBuilder("RefugeesFamilyIds", jobRepository)
+        return new StepBuilder("RefugeesLinkedProperties", jobRepository)
                 .<RefugeeDocument, RefugeeDocument>chunk(10, getTransactionManager())
                 .reader(mongoItemReader(RefugeeDocument.class))
                 .processor(new RefugeeLinkedPropertiesItemProcessor(refugeeService, supportService))
